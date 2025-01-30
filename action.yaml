@@ -56,7 +56,7 @@ runs:
         BASE_REF: ${{ inputs.base_ref }}
         CMU_FILE_PATH: ${{ inputs.path }}
         CMU_HEADING_LEVEL: ${{ inputs.level }}
-        CMU_BASE_URL: ${{ github.server }}/${{ github.repository }} 
+        CMU_BASE_URL: ${{ github.server_url }}/${{ github.repository }} 
       run: |
         HEAD_REF=$(git rev-parse HEAD)
         set -euo pipefail
