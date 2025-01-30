@@ -5,6 +5,9 @@ This action updates a markdown file with the commits between current head and a 
 My workflow for personal projects uses conventional commit messages but not releases so this just updates
 the changelog for each push.
 
+> [!NOTE]
+> This action can only be used in a Job that runs on a UNIX-like system currently (e.g `ubuntu-latest`)
+
 ## Basic Usage
 The action script should be relatively self explanatory but included below is an example workflow, changelog and config file:
 
