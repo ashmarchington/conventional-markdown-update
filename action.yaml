@@ -69,7 +69,7 @@ runs:
         echo "success=$SUCCESS" >> "$GITHUB_OUTPUT"
     - name: commit file
       id: commit
-      if: steps.conventional-markdown-update.success == 1
+      if: steps.conventional-markdown-update.success == 'success'
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: 'ci: commit updated ${{ inputs.path }} file'
