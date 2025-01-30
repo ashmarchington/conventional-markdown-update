@@ -62,7 +62,7 @@ runs:
         set -euo pipefail
         echo "head: $HEAD_REF"
         echo "base: $BASE_REF"
-        git log --pretty=format:"%H,%ad,%s,%an" --date-short $BASE_REF..$HEAD_REF >> /tmp/commit_log.txt
+        git log --pretty=format:"%H,%ad,%s,%an" --date=short $BASE_REF..$HEAD_REF >> /tmp/commit_log.txt
 
         conventional-markdown-update /tmp/commit_log.txt 2>&1 | awk '/error/ { found=1 } END { if (found) exit 0; else exit 1 }'
         echo "success=${echo $?}" >> "$GITHUB_OUTPUT"
