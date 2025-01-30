@@ -1,0 +1,19 @@
+[package]
+name = "conventional-markdown-update"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+pulldown-cmark = "0.12.2"
+pulldown-cmark-to-cmark = "20.0.0"
+serde = { version = "1.0.217", features = ["derive"] }
+toml = "0.8.19"
+
+[lints.clippy]
+perf = "deny"
+suspicious = "deny"
+style = "deny"
+
+[profile.release]
+opt-level = 3
+strip = "debuginfo"

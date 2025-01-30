@@ -1,0 +1,50 @@
+name: create release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install rust
+        id: install
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: clippy, rustfmt
+
+      - name: Create Release
+        uses: taiki-e/create-gh-release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-artifacts:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install rust
+        id: install
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: clippy, rustfmt
+
+      - name: Upload binaries
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: conventional-markdown-update
+          token: ${{ secrets.GITHUB_TOKEN }}

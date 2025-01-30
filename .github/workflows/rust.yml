@@ -1,0 +1,44 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  COLUMNS: 250
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
+
+jobs:
+  build-rust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install rust
+        id: install
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: check formatting
+        shell: bash
+        run: cargo fmt --check
+
+      - name: clippy
+        shell: bash
+        run: cargo clippy
+
+      - name: build
+        shell: bash
+        run: cargo build
+
+      - name: test
+        shell: bash
+        run: cargo test

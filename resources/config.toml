@@ -1,0 +1,12 @@
+[[commit-rule]]
+commit-type = "feat"
+header-type = "added"
+
+[[commit-rule]]
+commit-type = "fix"
+header-type = "fixed"
+
+[[commit-rule]]
+commit-type = "refactor"
+header-type = "changed"
+

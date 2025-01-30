@@ -1,0 +1,76 @@
+name: Run conventional-markdown-update
+description: Updates markdown by appending commits in section
+inputs:
+  path:
+    description: Path to markdown file to update
+  after:
+    description: Header after which sections will be appended.
+    required: true
+  level:
+    description: Header level of the after value
+    required: false
+    default: "1"
+  config:
+    description: Config file mapping section headers to convention commit messages
+    required: true
+  base_ref:
+    description: Base ref to use in comparison to grab commits. Usually the `before` of a push
+    required: true
+  version:
+    description: Version of  conventional-markdown-update to use. Default should be correct
+    required: false
+    default: "v1.0.0"
+outputs:
+  success:
+    description: Whether the operation was a success, will be 0 if successful and 1 if failed
+    value: ${{ steps.conventional-markdown-update.outputs.success }}
+
+runs:
+  using: composite
+  steps:
+    - name: cargo cache
+      uses: actions/cache@v4
+      continue-on-error: false
+      with:
+        key: conventional-markdown-update-${{ inputs.version }}
+        save-always: true
+        path: |
+          ~/.local/conventional-markdown-update/
+    - name: install conventional-markdown-update
+      shell: bash
+      run: |
+        if [ ! -f ~/.local/conventional-markdown-update/conventional-markdown-update ]; then
+          mkdir -p ~/.local/conventional-markdown-update
+          curl -L https://github.com/ashmarchington/conventional-markdown-update/releases/download/${{ inputs.version }}/conventional-markdown-update-x86_64-unknown-linux-gnu.tar.gz --output ~/.local/conventional-markdown-update/cmu.tar.gz
+          cd ~/.local/conventional-markdown-update
+          tar xfv cmu.tar.gz
+          rm cmu.tar.gz
+        fi
+        echo "$HOME/.local/conventional-markdown-update" >> "$GITHUB_PATH"
+    - name: run conventional-markdown-update
+      id: conventional-markdown-update
+      shell: bash
+      env:
+        CMU_CONFIG: ${{ inputs.config }}
+        CMU_AFTER_HEADING: ${{ inputs.after }}
+        BASE_REF: ${{ inputs.base_ref }}
+        CMU_FILE_PATH: ${{ inputs.path }}
+        CMU_HEADING_LEVEL: ${{ inputs.level }}
+        CMU_BASE_URL: ${{ github.server }}/${{ github.repository }} 
+      run: |
+        HEAD_REF=$(git rev-parse HEAD)
+        set -euo pipefail
+        echo "head: $HEAD_REF"
+        echo "base: $BASE_REF"
+        git log --pretty=format:"%H,%ad,%s,%an" --date-short $BASE_REF..$HEAD_REF >> /tmp/commit_log.txt
+
+        conventional-markdown-update /tmp/commit_log.txt 2>&1 | awk '/error/ { found=1 } END { if (found) exit 0; else exit 1 }'
+        echo "success=${echo $?}" >> "$GITHUB_OUTPUT"
+    - name: commit file
+      id: commit
+      if: steps.conventional-markdown-update.success == 1
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: 'ci: commit updated ${{ inputs.path }} file'
+        file_pattern: '${{ inputs.path }}'
+
